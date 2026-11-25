@@ -105,6 +105,13 @@ const remote = {
   deleteIdea: (id) => after(sb.from('reward_ideas').delete().eq('id', id)),
   redeem: (surprise) => after(sb.rpc('redeem_surprise', { p_surprise: surprise })),
   rename: (display_name) => after(sb.from('profiles').update({ display_name }).eq('id', state.session.userId)),
+  updateProfile: (patch) => after(sb.from('profiles').update(patch).eq('id', state.session.userId)),
+  uploadAvatar: async (blob) => {
+    const path = `${state.session.userId}/avatar.jpg`;
+    check(await sb.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '60' }));
+    const { data } = sb.storage.from('avatars').getPublicUrl(path);
+    return after(sb.from('profiles').update({ avatar_url: `${data.publicUrl}?v=${Date.now()}` }).eq('id', state.session.userId));
+  },
 };
 
 // ---------------------------------------------------------------- מצב הדגמה
@@ -134,7 +141,8 @@ function demoSeed() {
     t('לשלם חשבון חשמל', { assignee: M, topic: 'כספים', due_date: daysFromNow(3) }),
     t('לקבוע תור לסקירת מערכות', { topic: 'תורים לרופא ובריאות', priority: 3, due_date: daysFromNow(5) }),
     shed,
-    t('להרכיב את העריסה', { topic: 'לקראת הלידה', due_date: daysFromNow(12) }),
+    t('להרכיב את העריסה', { topic: 'לקראת הלידה', due_date: daysFromNow(12), notes: 'לבדוק שיש את כל הברגים ולפנות מקום בחדר' }),
+    t('קניות שבועיות בסופר', { topic: 'רשימת קניות שוטפת', due_date: daysFromNow(2), repeat: 'weekly' }),
     t('לקנות עגלה', { topic: 'לקראת הלידה', priority: 3 }),
     t('להשוות אפשרויות לספה', { topic: 'קניות חד פעמיות', priority: 1 }),
     t('לתקן את הידית בארון', { assignee: R, topic: 'תחזוקת בית שוטפת', priority: 1, created_by: R }),
@@ -187,7 +195,17 @@ const demo = {
     Object.assign(row, patch);
     if (patch.status === 'done' && before !== 'done') { row.completed_at = new Date().toISOString(); row.completed_by = state.me.id; }
     if (patch.status && patch.status !== 'done') { row.completed_at = null; row.completed_by = null; }
-    demoAward(row, before); emit(); return row;
+    demoAward(row, before);
+    if (row.repeat && !row.parent_id && !row.next_id && row.status === 'done' && before !== 'done') {
+      const step = { daily: 1, weekly: 7, biweekly: 14 }[row.repeat];
+      const today = iso(new Date());
+      const adv = (d) => { const x = new Date(d + 'T12:00:00'); if (step) x.setDate(x.getDate() + step); else x.setMonth(x.getMonth() + 1); return iso(x); };
+      let nxt = adv(row.due_date || today); while (nxt <= today) nxt = adv(nxt);
+      const n = { ...row, id: uuid(), status: 'todo', due_date: nxt, next_id: null, completed_at: null, completed_by: null, created_at: new Date().toISOString() };
+      state.tasks.push(n); row.next_id = n.id;
+      for (const s of state.tasks.filter((t) => t.parent_id === row.id)) state.tasks.push({ ...s, id: uuid(), parent_id: n.id, status: 'todo', completed_at: null, completed_by: null });
+    }
+    emit(); return row;
   },
   deleteTask: async (id) => {
     const kill = new Set([id, ...state.tasks.filter((t) => t.parent_id === id).map((t) => t.id)]);
@@ -198,6 +216,11 @@ const demo = {
   deleteIdea: async (id) => { state.ideas = state.ideas.filter((i) => i.id !== id); emit(); },
   redeem: async (surprise) => { state.redemptions.unshift({ id: uuid(), surprise, chosen_by: state.me.id, created_at: new Date().toISOString() }); emit(); },
   rename: async (name) => { state.me.display_name = name; emit(); },
+  updateProfile: async (patch) => { Object.assign(state.me, patch); emit(); },
+  uploadAvatar: async (blob) => {
+    state.me.avatar_url = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+    emit();
+  },
 };
 
 // ---------------------------------------------------------------- API

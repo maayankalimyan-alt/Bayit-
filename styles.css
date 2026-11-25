@@ -26,7 +26,8 @@ h1, h2, h3, p { margin: 0; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 #app { max-width: 480px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; position: relative; }
-.screen { flex: 1; display: flex; flex-direction: column; padding-bottom: calc(110px + var(--safe-bottom)); }
+.screen { flex: 1; display: flex; flex-direction: column; padding-bottom: calc(24vw + 24px + var(--safe-bottom)); }
+@media (min-width: 480px) { .screen { padding-bottom: calc(140px + var(--safe-bottom)); } }
 .screen.no-nav { padding-bottom: 24px; }
 .pad { padding: 0 20px; }
 .stack { display: flex; flex-direction: column; gap: 12px; }
@@ -70,7 +71,7 @@ h1, h2, h3, p { margin: 0; }
 /* status checkbox */
 .check { width: 44px; height: 44px; margin: -12px -11px; margin-inline-end: -8px; border: 0; background: none; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid #A9B0AB; background: #fff; display: flex; align-items: center; justify-content: center; }
-.box.doing { border-color: var(--orange); background: linear-gradient(to top, var(--orange) 50%, #fff 50%); }
+.box.doing { border: 2px dashed var(--orange); background: #fff; }
 .box.done { border: 0; background: var(--green); }
 .box.big { width: 20px; height: 20px; border-radius: 6px; }
 
@@ -108,18 +109,19 @@ textarea.input { height: auto; min-height: 80px; padding: 12px 14px; resize: ver
 .list-card > .list-row:first-child { border-top: 0; }
 .ico-sq { width: 36px; height: 36px; border-radius: 10px; background: var(--ground); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-/* bottom nav */
-.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: calc(88px + var(--safe-bottom)); z-index: 20; pointer-events: none; }
-.nav svg.shape { position: absolute; inset: 0 0 auto 0; width: 100%; height: 88px; filter: drop-shadow(0 -4px 16px rgba(27,31,29,.07)); overflow: visible; }
-.nav .fill { position: absolute; left: 0; right: 0; top: 87px; bottom: 0; background: #fff; }
-.nav a.tab { pointer-events: auto; position: absolute; top: 30px; width: 72px; height: 52px; margin-inline-start: -36px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: var(--ink); text-decoration: none; font-size: 12px; }
+/* bottom nav (geometry from the design: viewBox 1180x280) */
+.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 20; pointer-events: none; }
+.nav-in { position: relative; width: 100%; aspect-ratio: 1180 / 280; }
+.nav svg.shape { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 -4px 16px rgba(27,31,29,.07)); overflow: visible; }
+.nav .fill { height: var(--safe-bottom); background: #fff; }
+.nav a.tab { pointer-events: auto; position: absolute; top: 38.6%; bottom: 8px; width: 72px; margin-left: -36px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: var(--ink); text-decoration: none; font-size: 12px; font-weight: 400; }
 .nav a.tab[aria-current="page"] { font-weight: 500; }
-.nav .badge { position: absolute; top: -4px; left: -8px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; padding: 0 5px; border: 2px solid #fff; }
-.nav a.plus { pointer-events: auto; position: absolute; left: 50%; top: -6px; width: 56px; height: 56px; margin-left: -28px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; }
+.nav .badge { position: absolute; top: -4px; left: -8px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box; border: 2px solid #fff; }
+.nav a.plus { pointer-events: auto; position: absolute; left: 50%; top: -1%; width: 14.07%; aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; }
 
 /* misc */
 .empty { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 40px 20px; }
-.toast { position: fixed; left: 50%; bottom: calc(112px + var(--safe-bottom)); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 14px; display: flex; align-items: center; gap: 8px; z-index: 50; box-shadow: 0 10px 28px rgba(27,31,29,.25); animation: pop .25s ease-out; white-space: nowrap; }
+.toast { position: fixed; left: 50%; bottom: calc(26vw + 12px + var(--safe-bottom)); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 14px; display: flex; align-items: center; gap: 8px; z-index: 50; box-shadow: 0 10px 28px rgba(27,31,29,.25); animation: pop .25s ease-out; white-space: nowrap; }
 @keyframes pop { from { transform: translate(-50%, 12px); opacity: 0; } }
 .demo { background: #FFF3E8; color: #8F4A12; font-size: 12.5px; text-align: center; padding: 6px 12px; }
 .err { color: var(--red); font-size: 13.5px; }
@@ -133,3 +135,9 @@ textarea.input { height: auto; min-height: 80px; padding: 12px 14px; resize: ver
 .stat b { font-size: 24px; font-weight: 500; }
 .stat.alert { background: var(--red-bg); border-color: #F8D3CF; }
 .stat.alert b, .stat.alert span { color: var(--red); }
+
+/* שדה בחירה מעוצב (הרשימה עצמה נפתחת כרשימה של הטלפון) */
+.select-field { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; padding-inline-end: 12px; }
+.select-field select { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+.select-field .tag { font-size: 14px; }
+input[type="date"].input { -webkit-appearance: none; appearance: none; text-align: start; }

@@ -1,5 +1,5 @@
 // שומר את קבצי האפליקציה כדי שתיפתח מהר גם בקליטה חלשה. הנתונים עצמם תמיד מגיעים מהשרת.
-const CACHE = 'bayit-v2';
+const CACHE = 'bayit-v4';
 const SHELL = ['./', './index.html', './styles.css', './app.js', './store.js', './icons.js', './config.js', './vendor-supabase.js', './manifest.webmanifest'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
